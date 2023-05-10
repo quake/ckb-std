@@ -80,11 +80,7 @@ fn load_data<F: Fn(&mut [u8], usize) -> Result<usize, SysError>>(
 /// ```
 pub fn load_cell(index: usize, source: Source) -> Result<CellOutput, SysError> {
     let data = load_data(|buf, offset| syscalls::load_cell(buf, offset, index, source))?;
-
-    match CellOutputReader::verify(&data, false) {
-        Ok(()) => Ok(CellOutput::new_unchecked(data.into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(CellOutput::new_unchecked(data.into()))
 }
 
 /// Load input
@@ -104,11 +100,7 @@ pub fn load_cell(index: usize, source: Source) -> Result<CellOutput, SysError> {
 pub fn load_input(index: usize, source: Source) -> Result<CellInput, SysError> {
     let mut data = [0u8; CellInput::TOTAL_SIZE];
     syscalls::load_input(&mut data, 0, index, source)?;
-
-    match CellInputReader::verify(&data, false) {
-        Ok(()) => Ok(CellInput::new_unchecked(data.to_vec().into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(CellInput::new_unchecked(data.to_vec().into()))
 }
 
 /// Load header
@@ -128,11 +120,7 @@ pub fn load_input(index: usize, source: Source) -> Result<CellInput, SysError> {
 pub fn load_header(index: usize, source: Source) -> Result<Header, SysError> {
     let mut data = [0u8; Header::TOTAL_SIZE];
     syscalls::load_header(&mut data, 0, index, source)?;
-
-    match HeaderReader::verify(&data, false) {
-        Ok(()) => Ok(Header::new_unchecked(data.to_vec().into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(Header::new_unchecked(data.to_vec().into()))
 }
 
 /// Load witness args
@@ -169,11 +157,7 @@ pub fn load_witness_args(index: usize, source: Source) -> Result<WitnessArgs, Sy
 /// ```
 pub fn load_transaction() -> Result<Transaction, SysError> {
     let data = load_data(|buf, offset| syscalls::load_transaction(buf, offset))?;
-
-    match TransactionReader::verify(&data, false) {
-        Ok(()) => Ok(Transaction::new_unchecked(data.into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(Transaction::new_unchecked(data.into()))
 }
 
 /// Load cell capacity
@@ -299,11 +283,7 @@ pub fn load_cell_lock(index: usize, source: Source) -> Result<Script, SysError> 
     let data = load_data(|buf, offset| {
         syscalls::load_cell_by_field(buf, offset, index, source, CellField::Lock)
     })?;
-
-    match ScriptReader::verify(&data, false) {
-        Ok(()) => Ok(Script::new_unchecked(data.into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(Script::new_unchecked(data.into()))
 }
 
 /// Load cell type
@@ -321,17 +301,12 @@ pub fn load_cell_lock(index: usize, source: Source) -> Result<Script, SysError> 
 /// let type_script = load_cell_type(index, source).unwrap().unwrap();
 /// ```
 pub fn load_cell_type(index: usize, source: Source) -> Result<Option<Script>, SysError> {
-    let data = match load_data(|buf, offset| {
+    match load_data(|buf, offset| {
         syscalls::load_cell_by_field(buf, offset, index, source, CellField::Type)
     }) {
-        Ok(data) => data,
-        Err(SysError::ItemMissing) => return Ok(None),
-        Err(err) => return Err(err),
-    };
-
-    match ScriptReader::verify(&data, false) {
-        Ok(()) => Ok(Some(Script::new_unchecked(data.into()))),
-        Err(_err) => Err(SysError::Encoding),
+        Ok(data) => Ok(Some(Script::new_unchecked(data.into()))),
+        Err(SysError::ItemMissing) => Ok(None),
+        Err(err) => Err(err),
     }
 }
 
@@ -432,11 +407,7 @@ pub fn load_input_since(index: usize, source: Source) -> Result<u64, SysError> {
 pub fn load_input_out_point(index: usize, source: Source) -> Result<OutPoint, SysError> {
     let mut data = [0u8; OutPoint::TOTAL_SIZE];
     syscalls::load_input_by_field(&mut data, 0, index, source, InputField::OutPoint)?;
-
-    match OutPointReader::verify(&data, false) {
-        Ok(()) => Ok(OutPoint::new_unchecked(data.to_vec().into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(OutPoint::new_unchecked(data.to_vec().into()))
 }
 
 /// Load cell data
@@ -464,11 +435,7 @@ pub fn load_cell_data(index: usize, source: Source) -> Result<Vec<u8>, SysError>
 /// ```
 pub fn load_script() -> Result<Script, SysError> {
     let data = load_data(|buf, offset| syscalls::load_script(buf, offset))?;
-
-    match ScriptReader::verify(&data, false) {
-        Ok(()) => Ok(Script::new_unchecked(data.into())),
-        Err(_err) => Err(SysError::Encoding),
-    }
+    Ok(Script::new_unchecked(data.into()))
 }
 
 /// QueryIter
