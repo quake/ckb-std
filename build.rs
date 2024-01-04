@@ -42,15 +42,6 @@ fn setup_compiler_flags(build: &mut cc::Build) {
         .flag("-Wno-nonnull")
         .include("c/ckb-c-stdlib/libc");
 
-    let clang = match std::env::var_os("CLANG") {
-        Some(val) => val,
-        None => "clang-16".into(),
-    };
-
-    if cfg!(feature = "build-with-clang") {
-        build.compiler(clang);
-    }
-
     let compiler = build.get_compiler();
     if compiler.is_like_clang() {
         build
